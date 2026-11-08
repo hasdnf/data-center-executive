@@ -1,4 +1,19 @@
+# hendrikexec.com
+#
+# Everything here is public and meant to be found — by search engines and by AI
+# assistants alike. There is no user-agent list restricting anyone, because
+# "Allow: /" for "*" already permits every crawler, including GPTBot, ClaudeBot,
+# PerplexityBot, Google-Extended, CCBot and whatever comes next. Naming them
+# individually would change nothing; it would only look like configuration.
+
 User-agent: *
 Allow: /
 
-Sitemap: https://hasdnf.github.io/data-center-executive/sitemap.xml
+Sitemap: https://hendrikexec.com/sitemap.xml
+
+# Plain-text summary for AI systems that look for one, with links and structured
+# data notes: https://hendrikexec.com/llms.txt
+
+# OAuth return handler, unused. Not content, not for indexing.
+User-agent: *
+Disallow: /plaid-oauth.html

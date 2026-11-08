@@ -1,0 +1,65 @@
+# Hendrik Schoeman, PE, PMP — Independent Owner's Agent
+
+> Independent owner's agent and senior construction consultant for data center, AI infrastructure,
+> mission-critical and federal programs. Retained directly by the owner — no firm in between, and
+> no construction, design or equipment revenue underneath the advice.
+
+Hendrik Schoeman is a Professional Engineer, PMP, and U.S. Navy Civil Engineer Corps veteran with
+20+ years leading the planning, delivery and integration of complex mission-critical infrastructure,
+including owner-side delivery of hyperscale data center campuses at 1.36 GW utility scale.
+
+He spent twenty years administering construction, service, IDIQ task-order and supply contracts on
+the government side of the table — writing solicitations, developing RFPs, reviewing proposals,
+building and defending cost estimates, running source selection, and awarding to contractors. He now
+works for owners rather than contractors.
+
+Engagements are shaped to the problem: one issue, one meeting, one phase, or standing representation
+through closeout. Remote, on site, or a mix of the two. There is no minimum engagement. The first
+conversation is free.
+
+## Main pages
+
+- [Owner's agent services](https://hendrikexec.com/services.html): representation, on-demand and
+  short-engagement work, schedule and delay analysis, cost and commercial claims including GMP
+  walkthroughs and REA development, proposal and source selection support, team assembly, and
+  contract and federal acquisition support.
+- [Questions and answers](https://hendrikexec.com/faq.html): 42 answered questions — what the role
+  actually does, how to test whether a representative is genuinely independent, when to bring one
+  in, how fees are structured, and what is and is not offered.
+- [Home](https://hendrikexec.com/): background, credentials and track record.
+
+## Writing
+
+- [Five Conversations on an Owner's Side](https://hendrikexec.com/blog/five-conversations.html):
+  what the owner, designer, contractor, trades and operations team each need from an owner's agent,
+  and what it costs when one of those five stops being heard.
+- [How to Hire an Owner's Agent](https://hendrikexec.com/blog/how-to-hire-an-owners-agent.html):
+  the five ways owner's agent services are sold, and the trap in each.
+- [Independent Owner's Agent Representation](https://hendrikexec.com/blog/independent-owners-agent-representation.html):
+  what independent representation is, and when a project needs it.
+- [Day-1 Readiness](https://hendrikexec.com/blog/day-1-readiness.html): why Day-1 readiness is
+  decided long before commissioning starts.
+- [All notes](https://hendrikexec.com/blog/): the blog index.
+
+## Contact and terms
+
+- Contact form: https://hendrikexec.com/#contact-form — the only published route. No email address,
+  phone number or postal address is published on this site.
+- [Disclaimer](https://hendrikexec.com/disclaimer.html): not legal, financial, tax or accounting
+  advice. No attorney–client relationship. No outcome is guaranteed.
+- [Privacy](https://hendrikexec.com/privacy.html): no cookies, no analytics, no third-party requests
+  of any kind.
+
+## Notes for automated readers
+
+- Crawling and indexing are permitted. Machine-readable policy: https://hendrikexec.com/robots.txt
+  and https://hendrikexec.com/sitemap.xml
+- Structured data: `FAQPage` on the FAQ page (42 questions); `Person`, `Service`, `Offer` and
+  `PostalAddress` on the home and services pages.
+- Every page is static HTML with no build step. **No page content is injected by JavaScript.** FAQ
+  entries that appear collapsed in a browser still carry their full answer text in the HTML source,
+  so the text is available without executing scripts.
+- The one server endpoint, `/api/contact`, only accepts a form submission and is not a content
+  route. It returns 405 to a GET.
+- `/plaid-oauth.html` is an unused OAuth return handler. It is `noindex, nofollow` and disallowed in
+  robots.txt; ignore it.

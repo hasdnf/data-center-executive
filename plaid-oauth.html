@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Finishing bank connection — Hendrik Schoeman</title>
+<style>
+  :root{--bg:#0b0d10;--panel:#131619;--line:#242a30;--fg:#e8ecf1;--dim:#8b95a1;
+        --dim2:#5f6873;--bad:#f87171;--accent:#60a5fa;--good:#4ade80}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;
+       align-items:center;justify-content:center;padding:32px;
+       font:15px/1.55 ui-sans-serif,-apple-system,"SF Pro Text",Inter,system-ui,sans-serif}
+  .card{max-width:520px;width:100%;background:var(--panel);border:1px solid var(--line);
+        border-radius:14px;padding:28px 30px}
+  h1{font-size:17px;margin:0 0 6px;font-weight:600}
+  .sub{color:var(--dim);font-size:13px;margin:0 0 20px}
+  .status{font-size:13.5px;color:var(--fg);min-height:22px}
+  .status.err{color:var(--bad)}
+  .status.ok{color:var(--good)}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--dim2);
+           border-top-color:var(--accent);border-radius:50%;animation:s .7s linear infinite;
+           vertical-align:-2px;margin-right:8px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  code{background:#1b2025;padding:1.5px 6px;border-radius:5px;font-size:12.5px;color:#9fc4f5}
+  .foot{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+        color:var(--dim2);font-size:12px}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Finishing your bank connection</h1>
+  <p class="sub">Resuming the secure Plaid Link session you started. This takes a moment.</p>
+  <div class="status" id="status"><span class="spinner"></span>Re-opening Plaid Link…</div>
+  <div class="foot">
+    Nothing is sent anywhere except Plaid and your own local Finance Engine server.
+    No access token ever passes through this page.
+  </div>
+</div>
+
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<script>
+  // No tokens are stored in this page or its URL. We fetch a link_token from the
+  // local server at run time (Link token, not an access token — it is the value
+  // the Plaid Link SDK requires in the browser).
+  //
+  // API base: same-origin when this page is served by the Finance Engine server
+  // at 127.0.0.1; otherwise (this page hosted on the public domain, e.g.
+  // https://hendrikexec.com/plaid-oauth.html) we call the local server directly.
+  // The server allows this origin via a narrowly-scoped CORS rule.
+  var API = (location.hostname === '127.0.0.1' || location.hostname === 'localhost')
+    ? '' : 'http://127.0.0.1:8765';
+
+  var statusEl = document.getElementById('status');
+
+  function say(msg, cls) {
+    statusEl.className = 'status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = msg;
+  }
+
+  function post(path, body) {
+    return fetch(API + path, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body || {})
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        return {status: r.status, ok: r.ok, body: j};
+      });
+    });
+  }
+
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var oauthStateId = params.get('oauth_state_id');
+    var oauthError = params.get('error');
+
+    if (oauthError) {
+      say('The bank returned an error (' + oauthError + '). Close this tab and try again.', 'err');
+      return;
+    }
+    if (!oauthStateId) {
+      say('This page is the OAuth return handler — open it by completing a bank login, not directly.', 'err');
+      return;
+    }
+    if (typeof Plaid === 'undefined') {
+      say('Could not load Plaid Link. Check the connection and reload.', 'err');
+      return;
+    }
+
+    // Re-initialize Link with the SAME link_token and the full redirect URI
+    // (Plaid extracts the oauth_state_id from receivedRedirectUri).
+    post('/api/v1/link/session', {}).then(function (res) {
+      if (!res.ok || !res.body || !res.body.link_token) {
+        say('No pending Link session found. Go back and start the connection again.', 'err');
+        return;
+      }
+      var handler = Plaid.create({
+        token: res.body.link_token,
+        receivedRedirectUri: window.location.href,
+        onSuccess: function (publicToken, metadata) {
+          var inst = (metadata && metadata.institution) || {};
+          say('Connected. Registering with your Finance Engine…');
+          post('/api/v1/link/exchange', {
+            public_token: publicToken,
+            institution_name: inst.name || null,
+            institution_id: inst.institution_id || null
+          }).then(function (r2) {
+            if (r2.ok) {
+              say('Done — ' + (inst.name || 'bank') + ' connected'
+                  + (r2.body && r2.body.accounts != null ? ' (' + r2.body.accounts + ' accounts).' : '.')
+                  + ' You can close this tab and return to the app.', 'ok');
+            } else {
+              var m = (r2.body && r2.body.error && r2.body.error.message) || 'exchange failed';
+              say('Connected to the bank, but saving it failed: ' + m, 'err');
+            }
+          }).catch(function () {
+            say('Connected to the bank, but the local server was unreachable.', 'err');
+          });
+        },
+        onExit: function (err) {
+          if (err) {
+            say('Link closed before finishing' + (err.display_message ? ': ' + err.display_message : '.'), 'err');
+          }
+        }
+      });
+      handler.open();
+    }).catch(function () {
+      say('Could not reach the local Finance Engine server at ' + API + '. Is it running?', 'err');
+    });
+  })();
+</script>
+</body>
+</html>
